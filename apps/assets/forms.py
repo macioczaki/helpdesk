@@ -7,9 +7,19 @@ class AssetForm(forms.ModelForm):
     class Meta:
         model = Asset
         fields = [
-            "name", "type", "category", "manufacturer", "model_name",
-            "serial_number", "status", "location", "assigned_to",
-            "purchase_date", "warranty_until", "purchase_price", "notes",
+            "name",
+            "type",
+            "category",
+            "manufacturer",
+            "model_name",
+            "serial_number",
+            "status",
+            "location",
+            "assigned_to",
+            "purchase_date",
+            "warranty_until",
+            "purchase_price",
+            "notes",
         ]
         widgets = {
             "purchase_date": forms.DateInput(attrs={"type": "date"}),
@@ -37,7 +47,9 @@ class AssetForm(forms.ModelForm):
 
 class AssetAssignForm(forms.Form):
     user = forms.ModelChoiceField(
-        queryset=None, required=False, label="Użytkownik",
+        queryset=None,
+        required=False,
+        label="Użytkownik",
     )
     comment = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 2}),
@@ -47,6 +59,7 @@ class AssetAssignForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         from apps.accounts.models import User
+
         super().__init__(*args, **kwargs)
         self.fields["user"].queryset = User.objects.filter(is_active=True).order_by("username")
         for f in self.fields.values():
@@ -60,7 +73,15 @@ class AssetAssignForm(forms.Form):
 class LicenseForm(forms.ModelForm):
     class Meta:
         model = License
-        fields = ["name", "vendor", "seats_total", "seats_used", "expires_at", "key_reference", "notes"]
+        fields = [
+            "name",
+            "vendor",
+            "seats_total",
+            "seats_used",
+            "expires_at",
+            "key_reference",
+            "notes",
+        ]
         widgets = {
             "expires_at": forms.DateInput(attrs={"type": "date"}),
             "notes": forms.Textarea(attrs={"rows": 4}),

@@ -1,13 +1,16 @@
+from io import BytesIO
+
+import qrcode
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
-from django.http import HttpResponse, HttpResponseForbidden
-from django.contrib.auth.decorators import login_required
 
 from apps.accounts.mixins import RoleRequiredMixin
 from apps.accounts.models import User
@@ -15,9 +18,6 @@ from apps.accounts.models import User
 from .forms import AssetAssignForm, AssetForm, LicenseForm
 from .models import Asset, AssetAssignment, License
 
-from io import BytesIO
-
-import qrcode
 
 class AssetListView(LoginRequiredMixin, ListView):
     model = Asset
@@ -152,6 +152,7 @@ class LicenseUpdateView(RoleRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy("assets:license_list")
 
+
 @login_required
 def asset_qr(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
@@ -159,6 +160,7 @@ def asset_qr(request, pk):
     buf = BytesIO()
     img.save(buf, format="PNG")
     return HttpResponse(buf.getvalue(), content_type="image/png")
+
 
 @login_required
 def scan(request):
@@ -193,14 +195,17 @@ def labels_print(request):
         return redirect("assets:list")
 
     from .labels import build_labels_pdf
+
     pdf = build_labels_pdf(assets, base_url=request.build_absolute_uri("/"))
     response = HttpResponse(pdf, content_type="application/pdf")
     response["Content-Disposition"] = 'attachment; filename="etykiety.pdf"'
     return response
 
+
 @login_required
 def csv_template_view(request):
     from .services import csv_template
+
     response = HttpResponse(csv_template(), content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="szablon_majatek.csv"'
     return response
@@ -213,6 +218,7 @@ def import_view(request):
     result = None
     if request.method == "POST" and request.FILES.get("file"):
         from .services import import_assets_from_csv
+
         result = import_assets_from_csv(request.FILES["file"], request.user)
     return render(request, "assets/import.html", {"result": result})
 
@@ -220,15 +226,14 @@ def import_view(request):
 @login_required
 def export_view(request):
     from .services import export_assets_to_xlsx
+
     qs = Asset.objects.all()
     status = request.GET.get("status")
     if status in Asset.Status.values:
         qs = qs.filter(status=status)
     q = request.GET.get("q")
     if q:
-        qs = qs.filter(
-            Q(tag__icontains=q) | Q(name__icontains=q) | Q(serial_number__icontains=q)
-        )
+        qs = qs.filter(Q(tag__icontains=q) | Q(name__icontains=q) | Q(serial_number__icontains=q))
     data = export_assets_to_xlsx(qs)
     response = HttpResponse(
         data,
@@ -236,6 +241,7 @@ def export_view(request):
     )
     response["Content-Disposition"] = 'attachment; filename="majatek.xlsx"'
     return response
+
 
 class AlertsView(RoleRequiredMixin, ListView):
     allowed_roles = (User.Role.TECHNICIAN, User.Role.ADMIN)
@@ -247,6 +253,7 @@ class AlertsView(RoleRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         from .alerts import collect_alerts
+
         ctx = super().get_context_data(**kwargs)
         ctx["data"] = collect_alerts()
         return ctx

@@ -9,5 +9,6 @@ class RoleRequiredMixin(LoginRequiredMixin):
             return self.handle_no_permission()
         if self.allowed_roles and request.user.role not in self.allowed_roles:
             from django.core.exceptions import PermissionDenied
+
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)

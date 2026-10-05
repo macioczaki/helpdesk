@@ -12,7 +12,15 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
-    list_display = ("username", "email", "first_name", "last_name", "role", "department", "is_active")
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "role",
+        "department",
+        "is_active",
+    )
     list_filter = ("role", "department", "is_active", "is_staff")
     search_fields = ("username", "email", "first_name", "last_name")
     ordering = ("username",)

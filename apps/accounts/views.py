@@ -5,8 +5,8 @@ from django.db.models import Count
 from django.shortcuts import render
 from django.utils import timezone
 
-from apps.tickets.models import Ticket
 from apps.assets.alerts import collect_alerts
+from apps.tickets.models import Ticket
 
 
 @login_required
@@ -38,11 +38,7 @@ def home(request):
 
     recent = base.select_related("category", "created_by", "assigned_to")[:8]
 
-    per_category = (
-        base.values("category__name")
-        .annotate(total=Count("id"))
-        .order_by("-total")[:8]
-    )
+    per_category = base.values("category__name").annotate(total=Count("id")).order_by("-total")[:8]
     chart_labels = [row["category__name"] or "Bez kategorii" for row in per_category]
     chart_values = [row["total"] for row in per_category]
 
@@ -55,7 +51,7 @@ def home(request):
         "chart_labels": chart_labels,
         "chart_values": chart_values,
     }
-    
+
     if user.is_technician:
         alerts = collect_alerts()
         context["asset_alerts_count"] = alerts["count"]

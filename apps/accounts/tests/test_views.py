@@ -53,8 +53,8 @@ def test_role_required_mixin_denies_wrong_role():
         def get(self, request):
             return HttpResponse("ok")
 
-    from django.urls import path
     from django.test import override_settings
+    from django.urls import path
 
     urlconf = type("U", (), {"urlpatterns": [path("only-admin/", OnlyAdminView.as_view())]})
     with override_settings(ROOT_URLCONF=urlconf):

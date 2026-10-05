@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F, Q
+from django.db.models import F
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
@@ -25,10 +25,13 @@ class ArticleListView(LoginRequiredMixin, ListView):
         q = self.request.GET.get("q")
         if q:
             from django.contrib.postgres.search import SearchQuery, SearchRank
+
             query = SearchQuery(q, config="simple")
-            qs = qs.annotate(rank=SearchRank(F("search_vector"), query)).filter(
-                search_vector=query
-            ).order_by("-rank", "-updated_at")
+            qs = (
+                qs.annotate(rank=SearchRank(F("search_vector"), query))
+                .filter(search_vector=query)
+                .order_by("-rank", "-updated_at")
+            )
 
         tag_slug = self.request.GET.get("tag")
         if tag_slug:
@@ -48,6 +51,7 @@ class ArticleListView(LoginRequiredMixin, ListView):
         ctx["tags"] = ArticleTag.objects.all()
 
         from apps.tickets.models import Category
+
         ctx["categories"] = Category.objects.all()
         return ctx
 
@@ -77,8 +81,7 @@ class ArticleDetailView(LoginRequiredMixin, DetailView):
             KnowledgeArticle.objects.filter(
                 status=KnowledgeArticle.Status.PUBLISHED,
                 category=self.object.category,
-            )
-            .exclude(pk=self.object.pk)[:5]
+            ).exclude(pk=self.object.pk)[:5]
             if self.object.category
             else []
         )
@@ -104,6 +107,7 @@ class ArticleCreateView(RoleRequiredMixin, CreateView):
         ticket_id = self.request.GET.get("from_ticket")
         if ticket_id and ticket_id.isdigit():
             from apps.tickets.models import Ticket
+
             try:
                 t = Ticket.objects.get(pk=int(ticket_id))
                 initial["title"] = t.title

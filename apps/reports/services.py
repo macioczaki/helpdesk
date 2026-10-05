@@ -29,22 +29,13 @@ def build_report(date_from, date_to):
     # SLA
     open_statuses = [Ticket.Status.NEW, Ticket.Status.IN_PROGRESS, Ticket.Status.WAITING]
     breached = qs.filter(
-        Q(status__in=open_statuses, due_at__lt=timezone.now())
-        | Q(resolved_at__gt=F("due_at"))
+        Q(status__in=open_statuses, due_at__lt=timezone.now()) | Q(resolved_at__gt=F("due_at"))
     ).count()
 
     sla_percent = round(100 * (total - breached) / total, 1) if total else 100.0
 
-    by_category = (
-        qs.values("category__name")
-        .annotate(total=Count("id"))
-        .order_by("-total")
-    )
-    by_priority = (
-        qs.values("priority")
-        .annotate(total=Count("id"))
-        .order_by("-total")
-    )
+    by_category = qs.values("category__name").annotate(total=Count("id")).order_by("-total")
+    by_priority = qs.values("priority").annotate(total=Count("id")).order_by("-total")
     by_technician = (
         qs.values("assigned_to__username", "assigned_to__first_name", "assigned_to__last_name")
         .annotate(total=Count("id"))

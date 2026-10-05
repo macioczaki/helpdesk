@@ -1,8 +1,8 @@
 from django.contrib import admin
 
 from .models import (
-    Category,
     SLA,
+    Category,
     Ticket,
     TicketAttachment,
     TicketComment,
@@ -24,6 +24,7 @@ class TicketAttachmentInline(admin.TabularInline):
 
 # --- Rejestracje ---
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ("name", "parent", "default_priority")
@@ -39,8 +40,14 @@ class SLAAdmin(admin.ModelAdmin):
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = (
-        "number", "title", "status", "priority",
-        "category", "created_by", "assigned_to", "created_at",
+        "number",
+        "title",
+        "status",
+        "priority",
+        "category",
+        "created_by",
+        "assigned_to",
+        "created_at",
     )
     list_filter = ("status", "priority", "category")
     search_fields = ("number", "title", "description")

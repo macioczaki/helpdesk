@@ -25,7 +25,12 @@ class AssetAssignmentInline(admin.TabularInline):
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
     list_display = (
-        "tag", "name", "type", "status", "location", "assigned_to",
+        "tag",
+        "name",
+        "type",
+        "status",
+        "location",
+        "assigned_to",
         "warranty_until",
     )
     list_filter = ("type", "status", "category", "location")

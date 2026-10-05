@@ -18,7 +18,6 @@ urlpatterns = [
     path("<int:pk>/", views.AssetDetailView.as_view(), name="detail"),
     path("<int:pk>/edytuj/", views.AssetUpdateView.as_view(), name="update"),
     path("<int:pk>/przypisz/", views.asset_assign, name="assign"),
-
     path("licencje/", views.LicenseListView.as_view(), name="license_list"),
     path("licencje/nowa/", views.LicenseCreateView.as_view(), name="license_create"),
     path("licencje/<int:pk>/edytuj/", views.LicenseUpdateView.as_view(), name="license_update"),

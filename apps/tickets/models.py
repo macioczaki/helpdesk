@@ -22,7 +22,12 @@ class Category(models.Model):
     )
     default_priority = models.CharField(
         max_length=16,
-        choices=[("LOW", "Niski"), ("NORMAL", "Normalny"), ("HIGH", "Wysoki"), ("CRITICAL", "Krytyczny")],
+        choices=[
+            ("LOW", "Niski"),
+            ("NORMAL", "Normalny"),
+            ("HIGH", "Wysoki"),
+            ("CRITICAL", "Krytyczny"),
+        ],
         default="NORMAL",
     )
 
@@ -38,15 +43,18 @@ class Category(models.Model):
 class SLA(models.Model):
     priority = models.CharField(
         max_length=16,
-        choices=[("LOW", "Niski"), ("NORMAL", "Normalny"), ("HIGH", "Wysoki"), ("CRITICAL", "Krytyczny")],
+        choices=[
+            ("LOW", "Niski"),
+            ("NORMAL", "Normalny"),
+            ("HIGH", "Wysoki"),
+            ("CRITICAL", "Krytyczny"),
+        ],
         unique=True,
     )
     response_minutes = models.PositiveIntegerField(
         help_text="Czas do pierwszej reakcji (w minutach)."
     )
-    resolve_minutes = models.PositiveIntegerField(
-        help_text="Czas do rozwiązania (w minutach)."
-    )
+    resolve_minutes = models.PositiveIntegerField(help_text="Czas do rozwiązania (w minutach).")
 
     class Meta:
         verbose_name = "SLA"
@@ -73,12 +81,8 @@ class Ticket(models.Model):
     number = models.CharField(max_length=32, unique=True, editable=False)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    status = models.CharField(
-        max_length=16, choices=Status.choices, default=Status.NEW
-    )
-    priority = models.CharField(
-        max_length=16, choices=Priority.choices, default=Priority.NORMAL
-    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.NEW)
+    priority = models.CharField(max_length=16, choices=Priority.choices, default=Priority.NORMAL)
     category = models.ForeignKey(
         Category,
         null=True,
@@ -163,9 +167,7 @@ class Ticket(models.Model):
 
 
 class TicketComment(models.Model):
-    ticket = models.ForeignKey(
-        Ticket, on_delete=models.CASCADE, related_name="comments"
-    )
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="ticket_comments"
     )
@@ -186,9 +188,7 @@ class TicketComment(models.Model):
 
 
 class TicketAttachment(models.Model):
-    ticket = models.ForeignKey(
-        Ticket, on_delete=models.CASCADE, related_name="attachments"
-    )
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="attachments")
     comment = models.ForeignKey(
         TicketComment,
         null=True,
@@ -218,9 +218,7 @@ class TicketAttachment(models.Model):
 
 
 class TicketHistory(models.Model):
-    ticket = models.ForeignKey(
-        Ticket, on_delete=models.CASCADE, related_name="history"
-    )
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name="history")
     field = models.CharField(max_length=64)
     old_value = models.TextField(blank=True)
     new_value = models.TextField(blank=True)

@@ -3,7 +3,6 @@ from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 
-
 HEADER_FILL = PatternFill("solid", fgColor="0D6EFD")
 HEADER_FONT = Font(color="FFFFFF", bold=True)
 
@@ -56,7 +55,11 @@ def export_report_to_xlsx(report):
     ws4.append(["Technik", "Liczba zgłoszeń"])
     _style_header(ws4)
     for row in report["by_technician"]:
-        name = " ".join(filter(None, [row["assigned_to__first_name"], row["assigned_to__last_name"]])) or row["assigned_to__username"] or "— nieprzypisane —"
+        name = (
+            " ".join(filter(None, [row["assigned_to__first_name"], row["assigned_to__last_name"]]))
+            or row["assigned_to__username"]
+            or "— nieprzypisane —"
+        )
         ws4.append([name, row["total"]])
     ws4.column_dimensions["A"].width = 32
     ws4.column_dimensions["B"].width = 18

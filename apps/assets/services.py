@@ -8,17 +8,27 @@ from openpyxl.styles import Alignment, Font, PatternFill
 
 from .models import Asset, AssetCategory, Location
 
-
 HEADER_FILL = PatternFill("solid", fgColor="0D6EFD")
 HEADER_FONT = Font(color="FFFFFF", bold=True)
 
 
 CSV_COLUMNS = [
-    "tag", "name", "type", "status", "category",
-    "manufacturer", "model_name", "serial_number",
-    "building", "floor", "room",
-    "purchase_date", "warranty_until", "purchase_price",
-    "assigned_to_username", "notes",
+    "tag",
+    "name",
+    "type",
+    "status",
+    "category",
+    "manufacturer",
+    "model_name",
+    "serial_number",
+    "building",
+    "floor",
+    "room",
+    "purchase_date",
+    "warranty_until",
+    "purchase_price",
+    "assigned_to_username",
+    "notes",
 ]
 
 
@@ -26,13 +36,26 @@ def csv_template():
     buf = StringIO()
     w = csv.writer(buf)
     w.writerow(CSV_COLUMNS)
-    w.writerow([
-        "", "Laptop Dell", "LAPTOP", "IN_USE", "Sprzęt",
-        "Dell", "Latitude 5540", "SN123456",
-        "Budynek A", "1", "101",
-        "2024-01-15", "2027-01-15", "4599.00",
-        "admin", "Przykładowy wiersz — usuń przed importem",
-    ])
+    w.writerow(
+        [
+            "",
+            "Laptop Dell",
+            "LAPTOP",
+            "IN_USE",
+            "Sprzęt",
+            "Dell",
+            "Latitude 5540",
+            "SN123456",
+            "Budynek A",
+            "1",
+            "101",
+            "2024-01-15",
+            "2027-01-15",
+            "4599.00",
+            "admin",
+            "Przykładowy wiersz — usuń przed importem",
+        ]
+    )
     return buf.getvalue()
 
 
@@ -112,9 +135,9 @@ def import_assets_from_csv(file_obj, user):
                     errors.append(f"Wiersz {i}: nie znaleziono użytkownika {username}.")
 
             if tag:
-                asset, is_new = Asset.objects.update_or_create(tag=tag, defaults=defaults)
+                _, is_new = Asset.objects.update_or_create(tag=tag, defaults=defaults)
             else:
-                asset = Asset.objects.create(**defaults)
+                Asset.objects.create(**defaults)
                 is_new = True
 
             if is_new:
@@ -134,10 +157,21 @@ def export_assets_to_xlsx(queryset):
     ws.title = "Majątek"
 
     headers = [
-        "Tag", "Nazwa", "Typ", "Status", "Kategoria",
-        "Producent", "Model", "SN",
-        "Budynek", "Piętro", "Pokój",
-        "Przypisany do", "Data zakupu", "Gwarancja do", "Cena",
+        "Tag",
+        "Nazwa",
+        "Typ",
+        "Status",
+        "Kategoria",
+        "Producent",
+        "Model",
+        "SN",
+        "Budynek",
+        "Piętro",
+        "Pokój",
+        "Przypisany do",
+        "Data zakupu",
+        "Gwarancja do",
+        "Cena",
     ]
     ws.append(headers)
     for cell in ws[1]:
@@ -146,23 +180,25 @@ def export_assets_to_xlsx(queryset):
         cell.alignment = Alignment(horizontal="center", vertical="center")
 
     for a in queryset.select_related("category", "location", "assigned_to"):
-        ws.append([
-            a.tag,
-            a.name,
-            a.get_type_display(),
-            a.get_status_display(),
-            a.category.name if a.category else "",
-            a.manufacturer,
-            a.model_name,
-            a.serial_number,
-            a.location.building if a.location else "",
-            a.location.floor if a.location else "",
-            a.location.room if a.location else "",
-            a.assigned_to.username if a.assigned_to else "",
-            a.purchase_date.isoformat() if a.purchase_date else "",
-            a.warranty_until.isoformat() if a.warranty_until else "",
-            str(a.purchase_price) if a.purchase_price else "",
-        ])
+        ws.append(
+            [
+                a.tag,
+                a.name,
+                a.get_type_display(),
+                a.get_status_display(),
+                a.category.name if a.category else "",
+                a.manufacturer,
+                a.model_name,
+                a.serial_number,
+                a.location.building if a.location else "",
+                a.location.floor if a.location else "",
+                a.location.room if a.location else "",
+                a.assigned_to.username if a.assigned_to else "",
+                a.purchase_date.isoformat() if a.purchase_date else "",
+                a.warranty_until.isoformat() if a.warranty_until else "",
+                str(a.purchase_price) if a.purchase_price else "",
+            ]
+        )
 
     widths = [16, 32, 14, 14, 20, 16, 20, 18, 14, 8, 8, 16, 14, 14, 12]
     for i, w in enumerate(widths, start=1):

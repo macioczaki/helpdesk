@@ -40,12 +40,15 @@ def test_create_ticket_sets_author():
     emp = User.objects.create_user(username="emp", password="x", role=User.Role.EMPLOYEE)
     c = Client()
     c.force_login(emp)
-    r = c.post(reverse("tickets:create"), {
-        "title": "Drukarka nie działa",
-        "description": "Brak odpowiedzi",
-        "priority": Ticket.Priority.HIGH,
-        "category": "",
-    })
+    r = c.post(
+        reverse("tickets:create"),
+        {
+            "title": "Drukarka nie działa",
+            "description": "Brak odpowiedzi",
+            "priority": Ticket.Priority.HIGH,
+            "category": "",
+        },
+    )
     assert r.status_code == 302
     t = Ticket.objects.get()
     assert t.created_by == emp

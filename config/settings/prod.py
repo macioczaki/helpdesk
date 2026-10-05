@@ -1,5 +1,6 @@
-from .base import *  # noqa: F401,F403
 import environ
+
+from .base import *  # noqa: F401,F403
 
 env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")  # noqa: F405

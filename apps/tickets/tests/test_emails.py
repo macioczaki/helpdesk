@@ -18,9 +18,7 @@ def test_assigned_email_sent():
         role=User.Role.TECHNICIAN,
     )
     emp = User.objects.create_user(username="emp", password="x")
-    t = Ticket.objects.create(
-        title="A", description="...", created_by=emp, assigned_to=tech
-    )
+    t = Ticket.objects.create(title="A", description="...", created_by=emp, assigned_to=tech)
 
     send_ticket_assigned_email(t.pk)
     assert len(mail.outbox) == 1
@@ -30,9 +28,7 @@ def test_assigned_email_sent():
 
 @pytest.mark.django_db
 def test_status_change_email_sent():
-    emp = User.objects.create_user(
-        username="emp", password="x", email="emp@example.com"
-    )
+    emp = User.objects.create_user(username="emp", password="x", email="emp@example.com")
     t = Ticket.objects.create(title="A", description="...", created_by=emp)
 
     send_ticket_status_changed_email(t.pk, "NEW", "IN_PROGRESS")

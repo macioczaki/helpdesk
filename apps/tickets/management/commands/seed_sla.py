@@ -7,10 +7,10 @@ class Command(BaseCommand):
     help = "Tworzy domyślne wpisy SLA dla wszystkich priorytetów."
 
     DEFAULTS = {
-        Ticket.Priority.LOW: (480, 4320),       # 8h / 3 dni
-        Ticket.Priority.NORMAL: (240, 1440),    # 4h / 1 dzień
-        Ticket.Priority.HIGH: (60, 480),        # 1h / 8h
-        Ticket.Priority.CRITICAL: (30, 240),    # 30min / 4h
+        Ticket.Priority.LOW: (480, 4320),  # 8h / 3 dni
+        Ticket.Priority.NORMAL: (240, 1440),  # 4h / 1 dzień
+        Ticket.Priority.HIGH: (60, 480),  # 1h / 8h
+        Ticket.Priority.CRITICAL: (30, 240),  # 30min / 4h
     }
 
     def handle(self, *args, **options):

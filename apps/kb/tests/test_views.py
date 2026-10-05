@@ -3,7 +3,7 @@ from django.test import Client
 from django.urls import reverse
 
 from apps.accounts.models import User
-from apps.kb.models import ArticleTag, KnowledgeArticle
+from apps.kb.models import KnowledgeArticle
 
 
 @pytest.mark.django_db

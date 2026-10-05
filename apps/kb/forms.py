@@ -21,9 +21,7 @@ class ArticleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
-            self.fields["tags_input"].initial = ", ".join(
-                t.name for t in self.instance.tags.all()
-            )
+            self.fields["tags_input"].initial = ", ".join(t.name for t in self.instance.tags.all())
 
         for f in self.fields.values():
             if isinstance(f.widget, forms.CheckboxInput):

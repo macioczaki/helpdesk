@@ -8,10 +8,8 @@ from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from apps.accounts.models import User
-
 from .forms import CommentForm, TicketCreateForm, TicketUpdateForm
-from .models import Ticket, TicketAttachment, TicketComment
+from .models import Ticket, TicketAttachment
 
 
 class TicketListView(LoginRequiredMixin, ListView):
@@ -81,6 +79,7 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
         q = self.request.GET.get("title_hint") or ""
         if q:
             from apps.kb.models import KnowledgeArticle
+
             ctx["suggested_articles"] = KnowledgeArticle.objects.filter(
                 status=KnowledgeArticle.Status.PUBLISHED,
                 title__icontains=q,

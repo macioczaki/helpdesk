@@ -1,9 +1,6 @@
 import pytest
-from datetime import timedelta
-
 from django.test import Client
 from django.urls import reverse
-from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.tickets.models import Ticket

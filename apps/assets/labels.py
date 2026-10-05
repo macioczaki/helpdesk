@@ -10,7 +10,6 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 
-
 LABEL_W = 50 * mm
 LABEL_H = 30 * mm
 MARGIN = 5 * mm
@@ -97,8 +96,8 @@ def _draw_label(c, asset, x, y):
         tmp_path = tmp.name
 
     # Tekst — dostępna szerokość to ~20mm (od x+26mm do x+48mm)
-    text_x = x + qr_size + 4 * mm   # ~26mm od lewej krawędzi etykiety
-    text_max = 20                    # maksymalna liczba znaków
+    text_x = x + qr_size + 4 * mm  # ~26mm od lewej krawędzi etykiety
+    text_max = 20  # maksymalna liczba znaków
 
     c.setFont(FONT_BOLD, 7)
     c.drawString(text_x, y + LABEL_H - 7 * mm, _truncate(asset.tag, text_max))
