@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Moje konto{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4">Moje konto</h1>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Login</dt>
+            <dd class="col-sm-9">{{ user.username }}</dd>
+
+            <dt class="col-sm-3">Imię i nazwisko</dt>
+            <dd class="col-sm-9">{{ user.get_full_name|default:"—" }}</dd>
+
+            <dt class="col-sm-3">E-mail</dt>
+            <dd class="col-sm-9">{{ user.email|default:"—" }}</dd>
+
+            <dt class="col-sm-3">Rola</dt>
+            <dd class="col-sm-9">
+                <span class="badge bg-primary">{{ user.get_role_display }}</span>
+            </dd>
+
+            <dt class="col-sm-3">Dział</dt>
+            <dd class="col-sm-9">{{ user.department|default:"—" }}</dd>
+
+            <dt class="col-sm-3">Telefon</dt>
+            <dd class="col-sm-9">{{ user.phone|default:"—" }}</dd>
+
+            <dt class="col-sm-3">Pokój</dt>
+            <dd class="col-sm-9">{{ user.room|default:"—" }}</dd>
+        </dl>
+    </div>
+</div>
+{% endblock %}
