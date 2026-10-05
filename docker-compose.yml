@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["web"]
+    env_file: .env
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["worker"]
+    env_file: .env
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+
+  beat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    command: ["beat"]
+    env_file: .env
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  redisdata:
