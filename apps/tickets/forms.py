@@ -20,9 +20,10 @@ class TicketCreateForm(forms.ModelForm):
 
         for f in self.fields.values():
             css = f.widget.attrs.get("class", "")
-            f.widget.attrs["class"] = (css + " form-control").strip()
-            if isinstance(f.widget, forms.Select):
-                f.widget.attrs["class"] = (css + " form-select").strip()
+            if isinstance(f.widget, forms.CheckboxInput):
+                f.widget.attrs["class"] = (css + " form-check-input").strip()
+            else:
+                f.widget.attrs["class"] = (css + " form-control").strip()
 
 
 class TicketUpdateForm(forms.ModelForm):
@@ -49,11 +50,14 @@ class TicketUpdateForm(forms.ModelForm):
             if isinstance(f.widget, forms.Select):
                 f.widget.attrs["class"] = (css + " form-select").strip()
 
+
 class CommentForm(forms.ModelForm):
     class Meta:
         model = TicketComment
         fields = ["body", "is_internal"]
-        widgets = {"body": forms.Textarea(attrs={"rows": 3, "placeholder": "Treść komentarza..."})}
+        widgets = {
+            "body": forms.Textarea(attrs={"rows": 3, "placeholder": "Treść komentarza..."}),
+        }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", None)
@@ -61,5 +65,7 @@ class CommentForm(forms.ModelForm):
         if not (user and user.is_technician):
             self.fields.pop("is_internal")
         for f in self.fields.values():
+            if isinstance(f.widget, forms.CheckboxInput):
+                continue
             css = f.widget.attrs.get("class", "")
             f.widget.attrs["class"] = (css + " form-control").strip()
