@@ -18,4 +18,6 @@ urlpatterns = [
     path("", include("apps.accounts.urls")),
 
     path("zgloszenia/", include("apps.tickets.urls")),
+
+    path("raporty/", include("apps.reports.urls")),
 ]

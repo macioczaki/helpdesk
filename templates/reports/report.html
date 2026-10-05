@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Raporty{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Raporty</h1>
+    <a href="{% url 'reports:export' %}?from={{ report.date_from|date:'Y-m-d' }}&to={{ report.date_to|date:'Y-m-d' }}"
+       class="btn btn-success">
+        <i class="bi bi-file-earmark-excel"></i> Eksport XLSX
+    </a>
+</div>
+
+<form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+        <label class="form-label small">Od</label>
+        <input type="date" name="from" value="{{ report.date_from|date:'Y-m-d' }}" class="form-control">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small">Do</label>
+        <input type="date" name="to" value="{{ report.date_to|date:'Y-m-d' }}" class="form-control">
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-primary w-100">Pokaż</button>
+    </div>
+</form>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-muted small">Zgłoszenia w okresie</div>
+                <div class="display-6">{{ report.total }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-muted small">Rozwiązane</div>
+                <div class="display-6">{{ report.resolved }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="text-muted small">Średni czas rozwiązania</div>
+                <div class="display-6">
+                    {% if report.avg_resolve_hours %}{{ report.avg_resolve_hours }} h{% else %}—{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 {% if report.sla_percent < 90 %}border-warning{% endif %}">
+            <div class="card-body">
+                <div class="text-muted small">SLA dotrzymane</div>
+                <div class="display-6">{{ report.sla_percent }}%</div>
+                <div class="text-muted small">Przekroczone: {{ report.sla_breached }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Zgłoszenia wg kategorii</div>
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr><th>Kategoria</th><th class="text-end">Liczba</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in report.by_category %}
+                    <tr>
+                        <td>{{ row.category__name|default:"Bez kategorii" }}</td>
+                        <td class="text-end">{{ row.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-muted text-center py-3">Brak danych.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">Zgłoszenia wg priorytetu</div>
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr><th>Priorytet</th><th class="text-end">Liczba</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in report.by_priority %}
+                    <tr>
+                        <td>{{ row.priority }}</td>
+                        <td class="text-end">{{ row.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-muted text-center py-3">Brak danych.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">Zgłoszenia wg technika</div>
+            <table class="table table-sm mb-0">
+                <thead class="table-light">
+                    <tr><th>Technik</th><th class="text-end">Liczba</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in report.by_technician %}
+                    <tr>
+                        <td>{{ row.assigned_to__first_name }} {{ row.assigned_to__last_name }}{% if not row.assigned_to__username %}— nieprzypisane —{% endif %}</td>
+                        <td class="text-end">{{ row.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-muted text-center py-3">Brak danych.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
