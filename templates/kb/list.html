@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Baza wiedzy{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0"><i class="bi bi-book"></i> Baza wiedzy</h1>
+    {% if user.is_technician %}
+    <a href="{% url 'kb:create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Nowy artykuł
+    </a>
+    {% endif %}
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-5">
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Szukaj w tytułach i treści...">
+    </div>
+    <div class="col-md-3">
+        <select name="tag" class="form-select">
+            <option value="">— wszystkie tagi —</option>
+            {% for t in tags %}
+            <option value="{{ t.slug }}" {% if current_tag == t.slug %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="category" class="form-select">
+            <option value="">— wszystkie kategorie —</option>
+            {% for c in categories %}
+            <option value="{{ c.pk }}" {% if current_category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-1">
+        <button class="btn btn-outline-secondary w-100">Szukaj</button>
+    </div>
+</form>
+
+<div class="row g-3">
+    {% for a in articles %}
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title mb-1">
+                    <a href="{% url 'kb:detail' a.slug %}" class="text-decoration-none">{{ a.title }}</a>
+                </h5>
+                {% if a.summary %}
+                <p class="card-text text-muted small">{{ a.summary|truncatechars:160 }}</p>
+                {% endif %}
+                <div class="small text-muted">
+                    {% if a.category %}<span class="badge bg-light text-dark border">{{ a.category.name }}</span>{% endif %}
+                    {% for t in a.tags.all %}<span class="badge bg-info text-dark">{{ t.name }}</span>{% endfor %}
+                    {% if a.status != 'PUBLISHED' %}
+                    <span class="badge bg-warning text-dark">Szkic</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer text-muted small d-flex justify-content-between">
+                <span>{{ a.author.get_full_name|default:a.author.username }}</span>
+                <span><i class="bi bi-eye"></i> {{ a.views }} · {{ a.updated_at|date:"Y-m-d" }}</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-muted">Brak artykułów.</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+<nav class="mt-3">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&tag={{ current_tag }}&category={{ current_category }}">«</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&tag={{ current_tag }}&category={{ current_category }}">»</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -14,6 +14,7 @@ urlpatterns = [
 
     path("login/", auth_views.LoginView.as_view(template_name="registration/login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("baza-wiedzy/", include("apps.kb.urls")),
 
     path("", include("apps.accounts.urls")),
 

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+        <h1 class="h3 mb-1">{{ article.title }}</h1>
+        <div class="text-muted small">
+            {{ article.author.get_full_name|default:article.author.username }}
+            · {{ article.updated_at|date:"Y-m-d H:i" }}
+            · <i class="bi bi-eye"></i> {{ article.views }}
+            {% if article.status != 'PUBLISHED' %}<span class="badge bg-warning text-dark ms-2">Szkic</span>{% endif %}
+        </div>
+        <div class="mt-2">
+            {% if article.category %}<span class="badge bg-light text-dark border">{{ article.category.name }}</span>{% endif %}
+            {% for t in article.tags.all %}<span class="badge bg-info text-dark">{{ t.name }}</span>{% endfor %}
+        </div>
+    </div>
+    <div class="text-end">
+        {% if user.is_technician %}
+        <a href="{% url 'kb:update' article.slug %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil"></i> Edytuj
+        </a>
+        {% endif %}
+        <a href="{% url 'kb:list' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
+    </div>
+</div>
+
+{% if article.summary %}
+<div class="alert alert-light border">{{ article.summary }}</div>
+{% endif %}
+
+<div class="card mb-4">
+    <div class="card-body" style="white-space: pre-wrap;">{{ article.body }}</div>
+</div>
+
+{% if related %}
+<div class="card">
+    <div class="card-header">Powiązane artykuły</div>
+    <ul class="list-group list-group-flush">
+        {% for r in related %}
+        <li class="list-group-item"><a href="{% url 'kb:detail' r.slug %}">{{ r.title }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}
