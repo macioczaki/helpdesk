@@ -2,7 +2,7 @@ from django import forms
 
 from apps.accounts.models import User
 
-from .models import Category, Ticket
+from .models import Category, Ticket, TicketComment
 
 
 class TicketCreateForm(forms.ModelForm):
@@ -48,3 +48,18 @@ class TicketUpdateForm(forms.ModelForm):
             f.widget.attrs["class"] = (css + " form-control").strip()
             if isinstance(f.widget, forms.Select):
                 f.widget.attrs["class"] = (css + " form-select").strip()
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = TicketComment
+        fields = ["body", "is_internal"]
+        widgets = {"body": forms.Textarea(attrs={"rows": 3, "placeholder": "Treść komentarza..."})}
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        if not (user and user.is_technician):
+            self.fields.pop("is_internal")
+        for f in self.fields.values():
+            css = f.widget.attrs.get("class", "")
+            f.widget.attrs["class"] = (css + " form-control").strip()

@@ -23,15 +23,65 @@
 
 <div class="row g-3">
     <div class="col-md-8">
-        <div class="card">
+        <div class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">Opis</h5>
                 <p class="mb-0" style="white-space: pre-wrap;">{{ ticket.description }}</p>
             </div>
         </div>
+
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <span><i class="bi bi-chat-dots"></i> Komentarze ({{ comments|length }})</span>
+            </div>
+            <div class="card-body">
+                {% for c in comments %}
+                <div class="border-bottom pb-3 mb-3 {% if c.is_internal %}bg-warning bg-opacity-10 rounded p-2{% endif %}">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>
+                            <strong>{{ c.author.get_full_name|default:c.author.username }}</strong>
+                            {% if c.is_internal %}<span class="badge bg-warning text-dark">wewnętrzny</span>{% endif %}
+                        </span>
+                        <span>{{ c.created_at|date:"Y-m-d H:i" }}</span>
+                    </div>
+                    <div style="white-space: pre-wrap;">{{ c.body }}</div>
+                    {% if c.attachments.all %}
+                    <div class="mt-2 small">
+                        {% for a in c.attachments.all %}
+                        <a href="{% url 'tickets:attachment_download' a.pk %}" class="badge bg-light text-dark border text-decoration-none me-1">
+                            <i class="bi bi-paperclip"></i> {{ a.original_name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="text-muted small mb-0">Brak komentarzy.</p>
+                {% endfor %}
+
+                <form method="post" action="{% url 'tickets:add_comment' ticket.pk %}" enctype="multipart/form-data" class="mt-3">
+                    {% csrf_token %}
+                    <div class="mb-2">{{ comment_form.body }}</div>
+                    {% if comment_form.is_internal %}
+                    <div class="form-check mb-2">
+                        {{ comment_form.is_internal }}
+                        <label class="form-check-label small" for="{{ comment_form.is_internal.id_for_label }}">
+                            Komentarz wewnętrzny (niewidoczny dla pracownika)
+                        </label>
+                    </div>
+                    {% endif %}
+                    <div class="mb-2">
+                        <label class="form-label small">Załączniki</label>
+                        <input type="file" name="files" multiple class="form-control form-control-sm">
+                    </div>
+                    <button class="btn btn-primary btn-sm"><i class="bi bi-send"></i> Dodaj komentarz</button>
+                </form>
+            </div>
+        </div>
     </div>
+
     <div class="col-md-4">
-        <div class="card">
+        <div class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">Szczegóły</h5>
                 <dl class="row mb-0 small">
@@ -47,6 +97,16 @@
                     <dt class="col-5">Technik</dt>
                     <dd class="col-7">{{ ticket.assigned_to|default:"—" }}</dd>
 
+                    <dt class="col-5">Termin</dt>
+                    <dd class="col-7">
+                        {% if ticket.due_at %}
+                            <span class="{% if ticket.sla_breached %}text-danger fw-bold{% endif %}">
+                                {{ ticket.due_at|date:"Y-m-d H:i" }}
+                                {% if ticket.sla_breached %} ⚠{% endif %}
+                            </span>
+                        {% else %}—{% endif %}
+                    </dd>
+
                     <dt class="col-5">Aktualizacja</dt>
                     <dd class="col-7">{{ ticket.updated_at|date:"Y-m-d H:i" }}</dd>
 
@@ -55,6 +115,28 @@
                     <dd class="col-7">{{ ticket.resolved_at|date:"Y-m-d H:i" }}</dd>
                     {% endif %}
                 </dl>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-clock-history"></i> Historia zmian</h5>
+                <ul class="list-unstyled small mb-0">
+                    {% for h in history %}
+                    <li class="mb-2 border-bottom pb-2">
+                        <div class="text-muted">{{ h.changed_at|date:"Y-m-d H:i" }}</div>
+                        <div>
+                            <strong>{{ h.field }}</strong>:
+                            <code>{{ h.old_value|default:"—" }}</code>
+                            →
+                            <code>{{ h.new_value|default:"—" }}</code>
+                        </div>
+                        {% if h.changed_by %}<div class="text-muted">przez {{ h.changed_by.username }}</div>{% endif %}
+                    </li>
+                    {% empty %}
+                    <li class="text-muted">Brak zmian.</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>

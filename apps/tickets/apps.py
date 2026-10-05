@@ -6,3 +6,6 @@ class TicketsConfig(AppConfig):
     name = "apps.tickets"
     label = "tickets"
     verbose_name = "Zgłoszenia"
+
+    def ready(self):
+        from . import signals  # noqa: F401
