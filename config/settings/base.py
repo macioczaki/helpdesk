@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.tickets",
     "apps.assets",
+    "apps.kb",
     "apps.reports",
 ]
 
