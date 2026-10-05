@@ -33,6 +33,11 @@
                         <i class="bi bi-ticket-perforated"></i> Zgłoszenia
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'assets:list' %}">
+                        <i class="bi bi-pc-display"></i> Majątek
+                    </a>
+                </li>
                 {% if user.is_technician %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'reports:index' %}">

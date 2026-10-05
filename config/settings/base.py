@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     # local
     "apps.accounts",
     "apps.tickets",
+    "apps.assets",
     "apps.reports",
 ]
 

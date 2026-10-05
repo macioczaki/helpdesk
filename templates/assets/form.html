@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Edycja zasobu{% else %}Nowy zasób{% endif %}{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-4">{% if object %}Edycja {{ object.tag }}{% else %}Nowy zasób{% endif %}</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                {% for field in form %}
+                <div class="col-md-6">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-primary">Zapisz</button>
+                <a href="{% url 'assets:list' %}" class="btn btn-outline-secondary">Anuluj</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

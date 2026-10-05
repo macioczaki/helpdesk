@@ -1,0 +1,161 @@
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+
+from apps.accounts.mixins import RoleRequiredMixin
+from apps.accounts.models import User
+
+from .forms import AssetAssignForm, AssetForm, LicenseForm
+from .models import Asset, AssetAssignment, License
+
+from io import BytesIO
+
+import qrcode
+
+class AssetListView(LoginRequiredMixin, ListView):
+    model = Asset
+    template_name = "assets/list.html"
+    context_object_name = "assets"
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = Asset.objects.select_related("category", "location", "assigned_to")
+        status = self.request.GET.get("status")
+        if status in Asset.Status.values:
+            qs = qs.filter(status=status)
+        type_ = self.request.GET.get("type")
+        if type_ in Asset.Type.values:
+            qs = qs.filter(type=type_)
+        q = self.request.GET.get("q")
+        if q:
+            qs = qs.filter(
+                Q(tag__icontains=q)
+                | Q(name__icontains=q)
+                | Q(serial_number__icontains=q)
+                | Q(model_name__icontains=q)
+            )
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["statuses"] = Asset.Status.choices
+        ctx["types"] = Asset.Type.choices
+        ctx["current_status"] = self.request.GET.get("status", "")
+        ctx["current_type"] = self.request.GET.get("type", "")
+        ctx["q"] = self.request.GET.get("q", "")
+        return ctx
+
+
+class AssetDetailView(LoginRequiredMixin, DetailView):
+    model = Asset
+    template_name = "assets/detail.html"
+    context_object_name = "asset"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["assignments"] = self.object.assignments.select_related("user")[:50]
+        ctx["assign_form"] = AssetAssignForm()
+        return ctx
+
+
+class AssetCreateView(RoleRequiredMixin, CreateView):
+    allowed_roles = (User.Role.TECHNICIAN, User.Role.ADMIN)
+    model = Asset
+    form_class = AssetForm
+    template_name = "assets/form.html"
+
+    def form_valid(self, form):
+        messages.success(self.request, "Zasób został dodany.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("assets:detail", kwargs={"pk": self.object.pk})
+
+
+class AssetUpdateView(RoleRequiredMixin, UpdateView):
+    allowed_roles = (User.Role.TECHNICIAN, User.Role.ADMIN)
+    model = Asset
+    form_class = AssetForm
+    template_name = "assets/form.html"
+
+    def form_valid(self, form):
+        messages.success(self.request, "Zasób zaktualizowany.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("assets:detail", kwargs={"pk": self.object.pk})
+
+
+@require_POST
+def asset_assign(request, pk):
+    if not request.user.is_authenticated or not request.user.is_technician:
+        return redirect("assets:detail", pk=pk)
+    asset = get_object_or_404(Asset, pk=pk)
+    form = AssetAssignForm(request.POST)
+    if form.is_valid():
+        new_user = form.cleaned_data["user"]
+        now = timezone.now().date()
+
+        # zamknij poprzednie aktywne przypisanie
+        asset.assignments.filter(to_date__isnull=True).update(to_date=now)
+
+        if new_user:
+            AssetAssignment.objects.create(
+                asset=asset,
+                user=new_user,
+                from_date=now,
+                comment=form.cleaned_data.get("comment", ""),
+            )
+            asset.assigned_to = new_user
+            asset.status = Asset.Status.IN_USE
+        else:
+            asset.assigned_to = None
+            asset.status = Asset.Status.IN_STOCK
+        asset.save()
+
+        messages.success(request, "Przypisanie zaktualizowane.")
+    else:
+        messages.error(request, "Nie udało się zapisać przypisania.")
+    return redirect("assets:detail", pk=pk)
+
+
+class LicenseListView(RoleRequiredMixin, ListView):
+    allowed_roles = (User.Role.TECHNICIAN, User.Role.ADMIN)
+    model = License
+    template_name = "assets/license_list.html"
+    context_object_name = "licenses"
+
+
+class LicenseCreateView(RoleRequiredMixin, CreateView):
+    allowed_roles = (User.Role.TECHNICIAN, User.Role.ADMIN)
+    model = License
+    form_class = LicenseForm
+    template_name = "assets/license_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("assets:license_list")
+
+
+class LicenseUpdateView(RoleRequiredMixin, UpdateView):
+    allowed_roles = (User.Role.TECHNICIAN, User.Role.ADMIN)
+    model = License
+    form_class = LicenseForm
+    template_name = "assets/license_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("assets:license_list")
+
+@login_required
+def asset_qr(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
+    img = qrcode.make(asset.tag)
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return HttpResponse(buf.getvalue(), content_type="image/png")
