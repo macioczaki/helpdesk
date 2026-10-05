@@ -24,7 +24,11 @@ class ArticleListView(LoginRequiredMixin, ListView):
 
         q = self.request.GET.get("q")
         if q:
-            qs = qs.filter(Q(title__icontains=q) | Q(summary__icontains=q) | Q(body__icontains=q))
+            from django.contrib.postgres.search import SearchQuery, SearchRank
+            query = SearchQuery(q, config="simple")
+            qs = qs.annotate(rank=SearchRank(F("search_vector"), query)).filter(
+                search_vector=query
+            ).order_by("-rank", "-updated_at")
 
         tag_slug = self.request.GET.get("tag")
         if tag_slug:
@@ -94,6 +98,24 @@ class ArticleCreateView(RoleRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy("kb:detail", kwargs={"slug": self.object.slug})
+
+    def get_initial(self):
+        initial = super().get_initial()
+        ticket_id = self.request.GET.get("from_ticket")
+        if ticket_id and ticket_id.isdigit():
+            from apps.tickets.models import Ticket
+            try:
+                t = Ticket.objects.get(pk=int(ticket_id))
+                initial["title"] = t.title
+                initial["summary"] = t.description[:200]
+                initial["body"] = (
+                    f"Problem:\n{t.description}\n\n"
+                    f"Rozwiązanie:\n(opisz krok po kroku)\n\n"
+                    f"Zgłoszenie źródłowe: {t.number}"
+                )
+            except Ticket.DoesNotExist:
+                pass
+        return initial
 
 
 class ArticleUpdateView(RoleRequiredMixin, UpdateView):

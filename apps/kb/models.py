@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -51,6 +53,8 @@ class KnowledgeArticle(models.Model):
     published_at = models.DateTimeField(null=True, blank=True)
     views = models.PositiveIntegerField(default=0)
 
+    search_vector = SearchVectorField(null=True, editable=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -61,6 +65,8 @@ class KnowledgeArticle(models.Model):
         indexes = [
             models.Index(fields=["status", "-published_at"]),
             models.Index(fields=["category"]),
+            models.Index(fields=["search_vector"], name="kb_search_idx"),
+            GinIndex(fields=["search_vector"], name="kb_search_vector_gin"),
         ]
 
     def __str__(self):

@@ -59,6 +59,7 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
         ctx["comments"] = comments
         ctx["history"] = self.object.history.select_related("changed_by")[:50]
         ctx["comment_form"] = CommentForm(user=self.request.user)
+        ctx["can_convert_to_kb"] = self.request.user.is_technician
         return ctx
 
 
@@ -74,6 +75,17 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy("tickets:detail", kwargs={"pk": self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        q = self.request.GET.get("title_hint") or ""
+        if q:
+            from apps.kb.models import KnowledgeArticle
+            ctx["suggested_articles"] = KnowledgeArticle.objects.filter(
+                status=KnowledgeArticle.Status.PUBLISHED,
+                title__icontains=q,
+            )[:5]
+        return ctx
 
 
 class TicketUpdateView(LoginRequiredMixin, UpdateView):

@@ -7,6 +7,17 @@
     {% if object %}Edycja {{ object.number }}{% else %}Nowe zgłoszenie{% endif %}
 </h1>
 
+{% if suggested_articles %}
+<div class="alert alert-info">
+    <strong><i class="bi bi-lightbulb"></i> Być może to już opisane w bazie wiedzy:</strong>
+    <ul class="mb-0 mt-2">
+        {% for a in suggested_articles %}
+        <li><a href="{% url 'kb:detail' a.slug %}" target="_blank">{{ a.title }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 <div class="card">
     <div class="card-body">
         <form method="post" novalidate>
@@ -28,4 +39,52 @@
         </form>
     </div>
 </div>
+
+{% if not object %}
+<script>
+    (function () {
+        const title = document.getElementById("id_title");
+        if (!title) return;
+
+        let timer;
+        const container = document.querySelector(".card-body");
+
+        function ensureBox() {
+            let box = document.querySelector(".alert-info");
+            if (box) return box;
+            box = document.createElement("div");
+            box.className = "alert alert-info";
+            container.prepend(box);
+            return box;
+        }
+
+        title.addEventListener("input", function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                const q = title.value.trim();
+                if (q.length < 4) {
+                    const box = document.querySelector(".alert-info");
+                    if (box) box.remove();
+                    return;
+                }
+                const url = new URL(window.location.href);
+                url.searchParams.set("title_hint", q);
+                fetch(url, { headers: { "X-Requested-With": "fetch" } })
+                    .then(function (r) { return r.text(); })
+                    .then(function (html) {
+                        const doc = new DOMParser().parseFromString(html, "text/html");
+                        const incoming = doc.querySelector(".alert-info");
+                        const current = document.querySelector(".alert-info");
+                        if (incoming) {
+                            if (current) current.replaceWith(incoming);
+                            else container.prepend(incoming);
+                        } else if (current) {
+                            current.remove();
+                        }
+                    });
+            }, 500);
+        });
+    })();
+</script>
+{% endif %}
 {% endblock %}

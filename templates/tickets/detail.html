@@ -17,6 +17,11 @@
             <i class="bi bi-pencil"></i> Edytuj
         </a>
         {% endif %}
+        {% if can_convert_to_kb and ticket.status == 'RESOLVED' or can_convert_to_kb and ticket.status == 'CLOSED' %}
+        <a href="{% url 'kb:create' %}?from_ticket={{ ticket.pk }}" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-book"></i> Utwórz artykuł KB
+        </a>
+        {% endif %}
         <a href="{% url 'tickets:list' %}" class="btn btn-outline-secondary btn-sm">Powrót</a>
     </div>
 </div>

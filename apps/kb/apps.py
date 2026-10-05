@@ -6,3 +6,6 @@ class KbConfig(AppConfig):
     name = "apps.kb"
     label = "kb"
     verbose_name = "Baza wiedzy"
+
+    def ready(self):
+        from . import signals  # noqa: F401
