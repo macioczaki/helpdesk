@@ -16,3 +16,4 @@ black==24.10.0
 openpyxl==3.1.5
 whitenoise==6.7.0
 qrcode[pil]==8.0
+reportlab==4.2.5

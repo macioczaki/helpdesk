@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Skanuj{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mt-4">
+            <div class="card-body">
+                <h1 class="h4 mb-3"><i class="bi bi-upc-scan"></i> Skanuj zasób</h1>
+                <p class="text-muted small">
+                    Zeskanuj kod QR czytnikiem albo wpisz tag ręcznie (np. <code>AST-2026-00001</code>).
+                </p>
+                <form method="get" autocomplete="off">
+                    <div class="input-group">
+                        <input type="text" name="tag" value="{{ tag }}"
+                               class="form-control form-control-lg"
+                               placeholder="AST-..." autofocus>
+                        <button class="btn btn-primary">Szukaj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

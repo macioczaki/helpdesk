@@ -6,6 +6,21 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3 mb-0">Majątek</h1>
     <div>
+        <a href="{% url 'assets:scan' %}" class="btn btn-outline-primary">
+            <i class="bi bi-upc-scan"></i> Skanuj
+        </a>
+        <a href="{% url 'assets:labels_print' %}?all=1" class="btn btn-outline-secondary"
+           onclick="return confirm('Wydrukować etykiety dla wszystkich zasobów w użyciu i w magazynie?')">
+            <i class="bi bi-printer"></i> Etykiety (wszystkie)
+        </a>
+        {% if user.is_technician %}
+        <a href="{% url 'assets:import' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-upload"></i> Import CSV
+        </a>
+        {% endif %}
+        <a href="{% url 'assets:export' %}?{{ request.GET.urlencode }}" class="btn btn-outline-secondary">
+            <i class="bi bi-file-earmark-excel"></i> Eksport XLSX
+        </a>
         <a href="{% url 'assets:license_list' %}" class="btn btn-outline-secondary">
             <i class="bi bi-key"></i> Licencje
         </a>

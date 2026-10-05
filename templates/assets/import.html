@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Import majątku{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="h3 mb-3">Import majątku z CSV</h1>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="mb-2">
+                    Plik CSV zapisany z Excela (UTF-8) z kolumnami:
+                    <code>tag, name, type, status, category, manufacturer, model_name, serial_number, building, floor, room, purchase_date, warranty_until, purchase_price, assigned_to_username, notes</code>.
+                </p>
+                <a href="{% url 'assets:csv_template' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-download"></i> Pobierz szablon CSV
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Plik CSV</label>
+                        <input type="file" name="file" accept=".csv" class="form-control" required>
+                    </div>
+                    <button class="btn btn-primary"><i class="bi bi-upload"></i> Importuj</button>
+                    <a href="{% url 'assets:list' %}" class="btn btn-outline-secondary">Powrót</a>
+                </form>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="card">
+            <div class="card-header">Wynik importu</div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Utworzono:</strong> {{ result.0 }}</p>
+                <p class="mb-1"><strong>Zaktualizowano:</strong> {{ result.1 }}</p>
+                {% if result.2 %}
+                <p class="mb-1"><strong>Błędy ({{ result.2|length }}):</strong></p>
+                <ul class="small text-danger">
+                    {% for e in result.2 %}<li>{{ e }}</li>{% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
