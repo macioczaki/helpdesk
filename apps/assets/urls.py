@@ -13,6 +13,7 @@ urlpatterns = [
     path("import/", views.import_view, name="import"),
     path("import/szablon/", views.csv_template_view, name="csv_template"),
     path("eksport/", views.export_view, name="export"),
+    path("alerty/", views.AlertsView.as_view(), name="alerts"),
     path("<int:pk>/qr/", views.asset_qr, name="qr"),
     path("<int:pk>/", views.AssetDetailView.as_view(), name="detail"),
     path("<int:pk>/edytuj/", views.AssetUpdateView.as_view(), name="update"),

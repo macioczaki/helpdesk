@@ -52,6 +52,30 @@
     </div>
 </div>
 
+{% if user.is_technician and asset_alerts_count %}
+<div class="alert alert-warning d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <i class="bi bi-bell"></i>
+        <strong>{{ asset_alerts_count }}</strong> alertów majątku (gwarancje, licencje, naprawy).
+    </div>
+    <a href="{% url 'assets:alerts' %}" class="btn btn-sm btn-outline-dark">Zobacz</a>
+</div>
+{% endif %}
+
+{% if not user.is_technician and my_assets %}
+<div class="card mb-4">
+    <div class="card-header"><i class="bi bi-pc-display"></i> Mój sprzęt</div>
+    <ul class="list-group list-group-flush">
+        {% for a in my_assets %}
+        <li class="list-group-item d-flex justify-content-between">
+            <a href="{% url 'assets:detail' a.pk %}">{{ a.tag }} — {{ a.name }}</a>
+            <span class="badge bg-secondary">{{ a.get_status_display }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 <div class="row g-3">
     <div class="col-md-7">
         <div class="card h-100">

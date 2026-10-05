@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from apps.tickets.models import Ticket
+from apps.assets.alerts import collect_alerts
 
 
 @login_required
@@ -54,6 +55,12 @@ def home(request):
         "chart_labels": chart_labels,
         "chart_values": chart_values,
     }
+    
+    if user.is_technician:
+        alerts = collect_alerts()
+        context["asset_alerts_count"] = alerts["count"]
+    else:
+        context["my_assets"] = list(user.assets_assigned.all()[:5])
     return render(request, "accounts/home.html", context)
 
 

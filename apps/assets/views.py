@@ -236,3 +236,17 @@ def export_view(request):
     )
     response["Content-Disposition"] = 'attachment; filename="majatek.xlsx"'
     return response
+
+class AlertsView(RoleRequiredMixin, ListView):
+    allowed_roles = (User.Role.TECHNICIAN, User.Role.ADMIN)
+    template_name = "assets/alerts.html"
+    context_object_name = "alerts"
+
+    def get_queryset(self):
+        return Asset.objects.none()
+
+    def get_context_data(self, **kwargs):
+        from .alerts import collect_alerts
+        ctx = super().get_context_data(**kwargs)
+        ctx["data"] = collect_alerts()
+        return ctx
