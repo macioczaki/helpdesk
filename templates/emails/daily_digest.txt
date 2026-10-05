@@ -1,0 +1,10 @@
+Dzienny raport Helpdesk — {{ today|date:"Y-m-d" }}
+
+Zgłoszenia po terminie SLA ({{ breached|length }}):
+
+{% for t in breached %}— {{ t.number }} [{{ t.get_priority_display }}] {{ t.title }}
+  Termin: {{ t.due_at|date:"Y-m-d H:i" }}, technik: {{ t.assigned_to|default:"—" }}
+{% endfor %}
+
+--
+Helpdesk — wiadomość automatyczna, nie odpowiadaj.

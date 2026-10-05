@@ -2,7 +2,12 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from .models import SLA, Ticket, TicketHistory
+from .models import SLA, Ticket, TicketComment, TicketHistory
+from .tasks import (
+    send_new_comment_email,
+    send_ticket_assigned_email,
+    send_ticket_status_changed_email,
+)
 
 TRACKED_FIELDS = ("status", "priority", "assigned_to", "category", "title")
 
@@ -43,7 +48,6 @@ def ticket_post_save(sender, instance, created, **kwargs):
         new_val = getattr(instance, field)
         if old_val == new_val:
             continue
-        # assigned_to trzymamy jako ID
         if field == "assigned_to":
             old_val = old_val.pk if old_val else None
             new_val = new_val.pk if new_val else None
@@ -65,3 +69,21 @@ def ticket_post_save(sender, instance, created, **kwargs):
         Ticket.objects.filter(pk=instance.pk).update(**updates)
         for k, v in updates.items():
             setattr(instance, k, v)
+
+    # 4. Powiadomienia
+    old_status = old.get("status")
+    new_status = instance.status
+    if old_status and old_status != new_status:
+        send_ticket_status_changed_email.delay(instance.pk, old_status, new_status)
+
+    old_assigned = old.get("assigned_to")
+    new_assigned = instance.assigned_to
+    if new_assigned and (old_assigned is None or old_assigned.pk != new_assigned.pk):
+        send_ticket_assigned_email.delay(instance.pk)
+
+
+@receiver(post_save, sender=TicketComment)
+def comment_post_save(sender, instance, created, **kwargs):
+    if not created:
+        return
+    send_new_comment_email.delay(instance.pk)

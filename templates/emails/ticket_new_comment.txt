@@ -1,0 +1,9 @@
+Nowy komentarz w zgłoszeniu {{ ticket.number }}.
+
+Autor: {{ comment.author.get_full_name|default:comment.author.username }}
+Data:  {{ comment.created_at|date:"Y-m-d H:i" }}
+
+{{ comment.body }}
+
+--
+Helpdesk — wiadomość automatyczna, nie odpowiadaj.

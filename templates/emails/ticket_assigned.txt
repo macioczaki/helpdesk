@@ -1,0 +1,15 @@
+Zgłoszenie {{ ticket.number }} zostało Ci przypisane.
+
+Tytuł:     {{ ticket.title }}
+Status:    {{ ticket.get_status_display }}
+Priorytet: {{ ticket.get_priority_display }}
+Kategoria: {{ ticket.category|default:"—" }}
+Autor:     {{ ticket.created_by.get_full_name|default:ticket.created_by.username }}
+
+Termin (SLA): {{ ticket.due_at|date:"Y-m-d H:i"|default:"—" }}
+
+Opis:
+{{ ticket.description }}
+
+--
+Helpdesk — wiadomość automatyczna, nie odpowiadaj.

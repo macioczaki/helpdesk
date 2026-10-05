@@ -1,0 +1,9 @@
+Status zgłoszenia {{ ticket.number }} zmienił się.
+
+Z:  {{ old_status }}
+Na: {{ new_status }}
+
+Tytuł: {{ ticket.title }}
+
+--
+Helpdesk — wiadomość automatyczna, nie odpowiadaj.
