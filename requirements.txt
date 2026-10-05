@@ -14,3 +14,4 @@ factory-boy==3.3.1
 ruff==0.7.1
 black==24.10.0
 openpyxl==3.1.5
+whitenoise==6.7.0
