@@ -28,6 +28,7 @@ INSTALLED_APPS = [
 
     # local
     "apps.accounts",
+    "apps.tickets",
 ]
 
 MIDDLEWARE = [

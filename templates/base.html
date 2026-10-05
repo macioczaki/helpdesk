@@ -24,8 +24,15 @@
         <div class="collapse navbar-collapse" id="navMain">
             {% if user.is_authenticated %}
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Pulpit</a></li>
-                {# tu dojdą: Zgłoszenia, Majątek, Baza wiedzy #}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Pulpit
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tickets:list' %}">
+                        <i class="bi bi-ticket-perforated"></i> Zgłoszenia
+                    </a>
+                </li>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
